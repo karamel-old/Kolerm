@@ -1,0 +1,37 @@
+[
+    {
+        "name": "karamel/db",
+        "version": "v0.1.5",
+        "version_normalized": "0.1.5.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/karamel-pack/db.git",
+            "reference": "de6e0234e69638ff0fb8d9319d67545cf76eb15a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/karamel-pack/db/zipball/de6e0234e69638ff0fb8d9319d67545cf76eb15a",
+            "reference": "de6e0234e69638ff0fb8d9319d67545cf76eb15a",
+            "shasum": ""
+        },
+        "time": "2018-09-16T14:22:11+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Karamel\\DB\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Amir Kalantar",
+                "email": "amir.kalantar@gmail.com"
+            }
+        ],
+        "description": "database package for karamel"
+    }
+]

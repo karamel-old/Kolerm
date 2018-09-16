@@ -1,0 +1,19 @@
+{
+    "name": "karamel/db",
+    "description": "database package for karamel",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Amir Kalantar",
+            "email": "amir.kalantar@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Karamel\\DB\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
