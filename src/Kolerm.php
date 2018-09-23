@@ -38,7 +38,8 @@ class Kolerm
                 get_called_class(),
                 $this->primaryKey,
                 $this->dates,
-                $this->dateFormat
+                $this->dateFormat,
+                $this->tableName
             );
             return $this->query;
         }

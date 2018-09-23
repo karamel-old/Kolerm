@@ -18,6 +18,7 @@ class Builder implements IKolerm
     protected $dates;
     protected $connection;
     protected $dateFormat;
+    protected $conditions;
 
     private $model;
     private $orders;
@@ -25,13 +26,14 @@ class Builder implements IKolerm
     private $rowOffset;
     private $columns;
 
-    public function __construct($connection, $model, $pk, $d, $df)
+    public function __construct($connection, $model, $pk, $d, $df,$tb)
     {
         $this->model = $model;
         $this->connection = $connection;
         $this->primaryKey = $pk;
         $this->dates = $d;
         $this->dateFormat = $df;
+        $this->tableName = $tb;
     }
 
     public function getColumns()
