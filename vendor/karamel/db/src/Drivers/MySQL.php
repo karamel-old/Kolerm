@@ -3,30 +3,20 @@
 namespace Karamel\DB\Drivers;
 
 use Karamel\DB\Exceptions\ConnectionRefusedException;
+use Karamel\DB\Exceptions\QueryErrorException;
 use Karamel\DB\Interfaces\IDB;
 use mysqli;
 
 class MySQL implements IDB
 {
-    private $host;
-    private $user;
-    private $name;
-    private $pass;
-    private $port;
-    private $prefix;
+
     private $result;
-    private $collation;
+
     private $connection;
 
-    public function __construct($host, $user, $pass, $name, $port = 3306, $prefix = '', $collation = 'uft8mb4')
+    public function __construct()
     {
-        $this->host = $host;
-        $this->user = $user;
-        $this->pass = $pass;
-        $this->name = $name;
-        $this->port = $port;
-        $this->prefix = $prefix;
-        $this->collation = $collation;
+
     }
 
     public function connection()
@@ -34,12 +24,18 @@ class MySQL implements IDB
         if ($this->connection !== null)
             return $this->connection;
 
-        $connection = new mysqli($this->host, $this->user, $this->pass, $this->name, $this->port);
+
+        $connection = new mysqli( KM_DB_HOST,
+            KM_DB_USER,
+            KM_DB_PASS,
+            KM_DB_NAME,
+            KM_DB_PORT,
+            KM_DB_PREFIX);
         if ($connection->connect_errno !== 0)
             throw new ConnectionRefusedException($connection->connect_error, $connection->connect_errno);
 
 
-        $connection->set_charset($this->collation);
+        $connection->set_charset(KM_DB_COLLATION);
         $this->connection = $connection;
         return $this->connection;
     }
@@ -48,7 +44,9 @@ class MySQL implements IDB
     {
 
         $this->result = $this->connection()->query($query);
-        return $this;
+        if($this->result == false)
+            throw new QueryErrorException("Query : ".$query ." \nError:".$this->connection()->error);
+        return $this->result;
     }
 
     public function fetch_object()

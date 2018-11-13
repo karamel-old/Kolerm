@@ -9,7 +9,6 @@ class Kolerm
     protected $tableName;
     protected $primaryKey;
     protected $dates;
-    protected $connection;
     protected $dateFormat;
     protected $query;
     private $switches;
@@ -23,7 +22,7 @@ class Kolerm
             'onCreate' => 'created_at',
             'onUpdate' => 'updated_at'
         ];
-        $this->connection = \Karamel\DB\Facade\DB::getInstace();
+
         $this->dateFormat = 'Y-m-d H:i:s';
         $this->switches = [];
     }
@@ -34,8 +33,7 @@ class Kolerm
             return $this->query;
         } else {
             $this->query = new Builder(
-                $this->connection,
-                get_called_class(),
+                $this,
                 $this->primaryKey,
                 $this->dates,
                 $this->dateFormat,
@@ -56,5 +54,7 @@ class Kolerm
     {
         return $this->newQuery()->$name(...$arguments);
     }
-
+    public function __sleep() {
+        return $this->newQuery()->getColumns();
+    }
 }

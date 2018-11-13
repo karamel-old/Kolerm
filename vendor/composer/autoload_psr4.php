@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Karamel\\Kolerm\\' => array($baseDir . '/src'),
     'Karamel\\DB\\' => array($vendorDir . '/karamel/db/src'),
 );

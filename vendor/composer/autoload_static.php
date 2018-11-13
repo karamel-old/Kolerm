@@ -6,14 +6,23 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit857f491e4ccb6c4480f60859174a9f83
 {
+    public static $files = array (
+        '4e4f037b14793fac5c7f670fec56fa82' => __DIR__ . '/../..' . '/src/Helpers/String.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'K' => 
         array (
+            'Karamel\\Kolerm\\' => 15,
             'Karamel\\DB\\' => 11,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'Karamel\\Kolerm\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
         'Karamel\\DB\\' => 
         array (
             0 => __DIR__ . '/..' . '/karamel/db/src',

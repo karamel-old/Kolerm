@@ -2,6 +2,7 @@
 
 namespace Karamel\Kolerm;
 
+use Karamel\DB\Facade\DB;
 use Karamel\Kolerm\Interfaces\IKolerm;
 use Karamel\Kolerm\Traits\KolermDefineTrait;
 use Karamel\Kolerm\Traits\KolermLimitTrait;
@@ -16,7 +17,6 @@ class Builder implements IKolerm
     protected $tableName;
     protected $primaryKey;
     protected $dates;
-    protected $connection;
     protected $dateFormat;
     protected $conditions;
 
@@ -26,10 +26,9 @@ class Builder implements IKolerm
     private $rowOffset;
     private $columns;
 
-    public function __construct($connection, $model, $pk, $d, $df,$tb)
+    public function __construct($model, $pk, $d, $df,$tb)
     {
         $this->model = $model;
-        $this->connection = $connection;
         $this->primaryKey = $pk;
         $this->dates = $d;
         $this->dateFormat = $df;
@@ -40,7 +39,7 @@ class Builder implements IKolerm
     {
         if ($this->columns !== null)
             return $this->columns;
-        $columns = $this->connection->query('DESCRIBE ' . $this->tableName);
+        $columns = DB::getInstace()->query('DESCRIBE ' . $this->tableName);
         $data = [];
         while ($field = $columns->fetch_object()) {
             $data[] = $field->Field;
@@ -78,7 +77,7 @@ class Builder implements IKolerm
         //generate query
         $query = $this->generateQuery();
 
-        $tmp = $this->connection->query($query);
+        $tmp = DB::getInstace()->query($query);
         $result = [];
         $columns = $this->getColumns();
         while ($obj = $tmp->fetch_assoc()) {
@@ -101,14 +100,16 @@ class Builder implements IKolerm
         $this->take(1);
         return $this->get()[0];
     }
-
     public function find($number)
     {
+        $query = 'SELECT ' . implode(",", $this->getColumns()) . ' FROM ' . $this->tableName . ' WHERE ' . $this->primaryKey . '="' . $number . '" LIMIT 1';
+        $data = DB::getInstace()->query($query);
 
-        $data = $this->connection->query('SELECT ' . implode(",", $this->getColumns()) . ' FROM ' . $this->tableName . ' WHERE ' . $this->primaryKey . '="' . $number . '" LIMIT 1');
         if ($data->num_rows == 0)
             return null;
-        $obj = new User();
+
+        $obj = new $this->model();
+
         $data = $data->fetch_assoc();
         foreach ($data as $key => $value) {
             $obj->{$key} = $value;
@@ -116,19 +117,26 @@ class Builder implements IKolerm
         return $obj;
     }
 
-    public function delete($targetId = null)
+    public function delete()
     {
-        if ($targetId !== null && $this->{$this->primaryKey} === null) {
-            $this->connection->query('DELETE FROM ' . $this->tableName . ' WHERE `' . $this->primaryKey . '`="' . $targetId . '" LIMIT 1');
-        } else {
-            $this->connection->query('DELETE FROM ' . $this->tableName . ' WHERE `' . $this->primaryKey . '`="' . $this->{$this->primaryKey} . '" LIMIT 1');
+
+        if($this->model->{$this->primaryKey} != null){
+            $query = 'DELETE FROM ' . $this->tableName . ' WHERE `' . $this->primaryKey . '`="' . $this->model->{$this->primaryKey} . '" LIMIT 1';
+        }else{
+            $query = 'DELETE FROM ' . $this->tableName .' ';
+            $query .= $this->generateConditionQuerySegment();
         }
+
+        DB::getInstace()->query($query);
     }
 
     public function save()
     {
-        $object_vars = get_object_vars($this);
+
+        $object_vars = get_object_vars($this->model);
+
         $is_this_exists_row = false;
+
         foreach ($object_vars as $key => $object_var) {
             if ($key == $this->primaryKey)
                 $is_this_exists_row = true;
@@ -140,7 +148,7 @@ class Builder implements IKolerm
             }
 
             foreach ($object_vars as $key => $value) {
-                if (!in_array($key, $this->columns))
+                if (!in_array($key, $this->getColumns()))
                     continue;
                 if ($key == $this->primaryKey)
                     continue;
@@ -149,27 +157,27 @@ class Builder implements IKolerm
 
             $sql = 'UPDATE ' . $this->tableName . ' SET ' . implode(",", $object_sets) . ' WHERE ' . $this->primaryKey . '="' . $this->{$this->primaryKey} . '"';
 
-            $query = $this->connection->query($sql);
+            $query = DB::getInstace()->query($sql);
 
         } else {
 
             if (!isset($object_vars[$this->dates['onCreate']])) {
-                $object_vars[$this->dates['onCreate']] = (new DateTime())->format($this->dateFormat);
+                $object_vars[$this->dates['onCreate']] = (new \DateTime())->format($this->dateFormat);
             }
             if (!isset($object_vars[$this->dates['onUpdate']])) {
-                $object_vars[$this->dates['onUpdate']] = (new DateTime())->format($this->dateFormat);
+                $object_vars[$this->dates['onUpdate']] = (new \DateTime())->format($this->dateFormat);
             }
 
             $object_sets = [];
 
             foreach ($object_vars as $key => $value) {
-                if (!in_array($key, $this->columns))
+                if (!in_array($key, $this->getColumns()))
                     continue;
                 $object_sets[] = '`' . $key . '`="' . $value . '"';
             }
             $sql = 'INSERT INTO ' . $this->tableName . ' SET ' . implode(",", $object_sets);
-
-            $query = $this->connection->query($sql);
+            $query = DB::getInstace()->query($sql);
+            $this->model->id = DB::getInstace()->inserted_Id();
         }
     }
 
@@ -187,8 +195,7 @@ class Builder implements IKolerm
     public function generateQuery()
     {
         $query = 'SELECT ' . implode(",", $this->getColumns()) . ' FROM ' . $this->tableName;
-        if ($this->conditions !== null && count($this->conditions) > 0)
-            $query .= ' WHERE ' . implode(" AND ", $this->conditions);
+        $query .= $this->generateConditionQuerySegment();
 
         if ($this->orders !== null && count($this->orders) > 0)
             $query .= ' order by ' . implode(",", $this->orders);
@@ -204,5 +211,16 @@ class Builder implements IKolerm
         }
 
         return $query;
+    }
+
+    /**
+     * @param $query
+     * @return string
+     */
+    private function generateConditionQuerySegment()
+    {
+        if ($this->conditions !== null && count($this->conditions) > 0)
+            return ' WHERE ' . implode(" AND ", $this->conditions);
+        return '';
     }
 }

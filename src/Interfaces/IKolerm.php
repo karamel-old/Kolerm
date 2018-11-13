@@ -13,7 +13,7 @@ interface IKolerm
 
     public function find($number);
 
-    public function delete($targetId = null);
+    public function delete();
 
     public function save();
 
