@@ -43,6 +43,32 @@ class Kolerm
         }
     }
 
+    public function hasMany($classname, $foreignKey, $sourceKey = 'id')
+    {
+        $class = new $classname();
+        $builder = new Builder($class, $class->primaryKey, $class->dates, $class->dateFormat, $class->tableName);
+        return $builder->where($foreignKey, $this->{$sourceKey});
+    }
+
+    public function belongsTo($classname, $foreignKey, $sourceKey = 'id')
+    {
+        $class = new $classname();
+        $builder = new Builder($class, $class->primaryKey, $class->dates, $class->dateFormat, $class->tableName);
+        return $builder->where($sourceKey, $this->{$foreignKey})->first();
+    }
+
+    public function belongsToMany($classname, $pivot_table, $sourceKey, $foreignKey)
+    {
+
+        $class = new $classname;
+        $builder = new Builder($class, $class->primaryKey, $class->dates, $class->dateFormat, $class->tableName);
+
+        return $builder->join($pivot_table)
+            ->where('`' . $pivot_table . '`.`' . $sourceKey . '`', $this->{$this->primaryKey})
+            ->where('`' . $pivot_table . '`.`' . $foreignKey . '`', '`' . $class->tableName . '`.`' . $class->primaryKey . '`');
+
+
+    }
 
     public static function __callStatic($name, $arguments)
     {
@@ -54,7 +80,17 @@ class Kolerm
     {
         return $this->newQuery()->$name(...$arguments);
     }
-    public function __sleep() {
+
+    public function __sleep()
+    {
         return $this->newQuery()->getColumns();
+    }
+
+    public function __get($name)
+    {
+        if (method_exists($this, $name))
+            return $this->$name();
+        throw new \Exception("Attribute not found");
+
     }
 }

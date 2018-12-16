@@ -1,3 +1,6 @@
 <?php
-    namespace Karamel\DB\Exceptions;
-    class ConnectionRefusedException extends \Exception {}
+
+namespace Karamel\DB\Exceptions;
+class ConnectionRefusedException extends \Exception
+{
+}

@@ -1,7 +1,9 @@
 <?php
+
 namespace Karamel\Kolerm\Traits;
 
-trait KolermDefineTrait{
+trait KolermDefineTrait
+{
     public function defineEmptyConditions()
     {
         if (!is_array($this->conditions))

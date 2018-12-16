@@ -25,8 +25,9 @@ class Builder implements IKolerm
     private $rowTakes;
     private $rowOffset;
     private $columns;
+    private $join;
 
-    public function __construct($model, $pk, $d, $df,$tb)
+    public function __construct($model, $pk, $d, $df, $tb)
     {
         $this->model = $model;
         $this->primaryKey = $pk;
@@ -35,17 +36,32 @@ class Builder implements IKolerm
         $this->tableName = $tb;
     }
 
-    public function getColumns()
+    public function getColumns($complete = false)
     {
-        if ($this->columns !== null)
-            return $this->columns;
+        if ($this->columns !== null && isset($this->columns[(int)$complete]))
+            return $this->columns[(int)$complete];
         $columns = DB::getInstace()->query('DESCRIBE ' . $this->tableName);
         $data = [];
         while ($field = $columns->fetch_object()) {
-            $data[] = $field->Field;
+            $data[] = $complete ? '`' . $this->tableName . '`.`' . $field->Field . '`' : $field->Field;
         }
-        $this->columns = $data;
-        return $this->columns;
+
+        $this->columns[(int)$complete] = $data;
+        return $this->columns[(int)$complete];
+    }
+
+    private function pAW($arg, $type = 'column')
+    {
+        if (strpos($arg, "`") > -1 && $type == 'column')
+            return $arg;
+        elseif (strpos($arg, "`") > -1 && $type == 'value')
+            return $arg;
+        elseif (strpos($arg, "`") == -1 && $type == 'column')
+            return '`' . $arg . '`';
+        elseif (strpos($arg, "`") == -1 && $type == 'value')
+            return '"' . $arg . '"';
+        else
+            return '"' . $arg . '"';
     }
 
     public function where()
@@ -56,9 +72,9 @@ class Builder implements IKolerm
         $this->defineEmptyConditions();
 
         if (in_array($args[1], $values)) {
-            $where = '`' . $args[0] . '`' . $args[1] . '"' . $args[2] . '"';
+            $where = $this->pAW($args[0]) . $args[1] . $this->pAW($args[1], 'value');
         } else {
-            $where = '`' . $args[0] . '`="' . $args[1] . '"';
+            $where = $this->pAW($args[0]) . '=' . $this->pAW($args[1], 'value');
         }
         $this->conditions[] = $where;
         return $this;
@@ -95,11 +111,18 @@ class Builder implements IKolerm
 
     }
 
+    public function join($tableName)
+    {
+        $this->join = $tableName;
+        return $this;
+    }
+
     public function first()
     {
         $this->take(1);
         return $this->get()[0];
     }
+
     public function find($number)
     {
         $query = 'SELECT ' . implode(",", $this->getColumns()) . ' FROM ' . $this->tableName . ' WHERE ' . $this->primaryKey . '="' . $number . '" LIMIT 1';
@@ -120,10 +143,10 @@ class Builder implements IKolerm
     public function delete()
     {
 
-        if($this->model->{$this->primaryKey} != null){
+        if ($this->model->{$this->primaryKey} != null) {
             $query = 'DELETE FROM ' . $this->tableName . ' WHERE `' . $this->primaryKey . '`="' . $this->model->{$this->primaryKey} . '" LIMIT 1';
-        }else{
-            $query = 'DELETE FROM ' . $this->tableName .' ';
+        } else {
+            $query = 'DELETE FROM ' . $this->tableName . ' ';
             $query .= $this->generateConditionQuerySegment();
         }
 
@@ -194,7 +217,10 @@ class Builder implements IKolerm
 
     public function generateQuery()
     {
-        $query = 'SELECT ' . implode(",", $this->getColumns()) . ' FROM ' . $this->tableName;
+        $query = 'SELECT ' . implode(",", $this->getColumns(true)) . ' FROM `' . $this->tableName . '`';
+        if ($this->join !== null)
+            $query .= ',`' . $this->join . '`';
+
         $query .= $this->generateConditionQuerySegment();
 
         if ($this->orders !== null && count($this->orders) > 0)

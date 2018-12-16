@@ -19,13 +19,22 @@ class MySQL implements IDB
 
     }
 
+    public function query($query)
+    {
+
+        $this->result = $this->connection()->query($query);
+        if ($this->result == false)
+            throw new QueryErrorException("Query : " . $query . " \nError:" . $this->connection()->error);
+        return $this->result;
+    }
+
     public function connection()
     {
         if ($this->connection !== null)
             return $this->connection;
 
 
-        $connection = new mysqli( KM_DB_HOST,
+        $connection = new mysqli(KM_DB_HOST,
             KM_DB_USER,
             KM_DB_PASS,
             KM_DB_NAME,
@@ -38,15 +47,6 @@ class MySQL implements IDB
         $connection->set_charset(KM_DB_COLLATION);
         $this->connection = $connection;
         return $this->connection;
-    }
-
-    public function query($query)
-    {
-
-        $this->result = $this->connection()->query($query);
-        if($this->result == false)
-            throw new QueryErrorException("Query : ".$query ." \nError:".$this->connection()->error);
-        return $this->result;
     }
 
     public function fetch_object()

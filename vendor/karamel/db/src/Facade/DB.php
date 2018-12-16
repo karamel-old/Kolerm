@@ -8,6 +8,11 @@ class DB
 {
     private static $instance;
 
+    public static function query($query)
+    {
+        return self::getInstace()->query($query);
+    }
+
     public static function getInstace()
     {
         if (self::$instance !== null)
@@ -15,11 +20,6 @@ class DB
 
         self::$instance = DBFactory::build();
         return self::$instance;
-    }
-
-    public static function query($query)
-    {
-        return self::getInstace()->query($query);
     }
 
 }

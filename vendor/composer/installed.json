@@ -1,37 +1,37 @@
 [
-    {
-        "name": "karamel/db",
-        "version": "v0.1.6",
-        "version_normalized": "0.1.6.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/karamel-pack/db.git",
-            "reference": "513a8082ebc7193c0820c8af3ffa9db63ec0c433"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/karamel-pack/db/zipball/513a8082ebc7193c0820c8af3ffa9db63ec0c433",
-            "reference": "513a8082ebc7193c0820c8af3ffa9db63ec0c433",
-            "shasum": ""
-        },
-        "time": "2018-11-13T14:49:26+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "Karamel\\DB\\": "src/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Amir Kalantar",
-                "email": "amir.kalantar@gmail.com"
-            }
-        ],
-        "description": "database package for karamel"
-    }
+  {
+    "name": "karamel/db",
+    "version": "v0.1.6",
+    "version_normalized": "0.1.6.0",
+    "source": {
+      "type": "git",
+      "url": "https://github.com/karamel-pack/db.git",
+      "reference": "513a8082ebc7193c0820c8af3ffa9db63ec0c433"
+    },
+    "dist": {
+      "type": "zip",
+      "url": "https://api.github.com/repos/karamel-pack/db/zipball/513a8082ebc7193c0820c8af3ffa9db63ec0c433",
+      "reference": "513a8082ebc7193c0820c8af3ffa9db63ec0c433",
+      "shasum": ""
+    },
+    "time": "2018-11-13T14:49:26+00:00",
+    "type": "library",
+    "installation-source": "dist",
+    "autoload": {
+      "psr-4": {
+        "Karamel\\DB\\": "src/"
+      }
+    },
+    "notification-url": "https://packagist.org/downloads/",
+    "license": [
+      "MIT"
+    ],
+    "authors": [
+      {
+        "name": "Amir Kalantar",
+        "email": "amir.kalantar@gmail.com"
+      }
+    ],
+    "description": "database package for karamel"
+  }
 ]
