@@ -19,6 +19,6 @@
   },
   "minimum-stability": "dev",
   "require": {
-    "karamel/db": "0.1.6"
+    "karamel/db": "0.1.7"
   }
 }
